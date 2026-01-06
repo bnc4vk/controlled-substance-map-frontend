@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { createMap } from "./map-core/map-core.js";
-=======
-import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
->>>>>>> 4ced6fe (Add drug data adapter for API normalization)
 
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";
@@ -68,7 +64,6 @@ const { map, updateFillColors } = createMap({
   },
 });
 
-<<<<<<< HEAD
 function updateMapColors(drugKey) {
   const drugData = tileData[drugKey];
   if (!map.getLayer("countries-second-view") || !drugData) return;
@@ -84,41 +79,6 @@ function updateMapColors(drugKey) {
     colorMap,
     defaultColor: statusColors.Unknown,
   });
-=======
-let displayedCountriesViewIsFirst = true;
-function updateMapColors(countryColorMap) {
-  if (!map.getLayer("countries-second-view") || !countryColorMap) return;
-
-  const entries = Object.entries(countryColorMap).flatMap(([code, color]) => [
-    code,
-    color,
-  ]);
-
-  const newExpression = [
-    "match",
-    ["slice", ["get", "iso_3166_1"], 0, 2],
-    ...entries,
-    statusColors.Unknown,
-  ];
-
-  const countryViewToHide = displayedCountriesViewIsFirst ? "countries-first-view" : "countries-second-view";
-  const countryViewToDisplay = displayedCountriesViewIsFirst ? "countries-second-view" : "countries-first-view";
-  displayedCountriesViewIsFirst = !displayedCountriesViewIsFirst;
-
-  map.setPaintProperty(countryViewToDisplay, "fill-color", newExpression);
-
-  map.setPaintProperty(countryViewToHide, "fill-opacity-transition", {
-    duration: 2000,
-    delay: 0,
-  });
-  map.setPaintProperty(countryViewToHide, "fill-opacity", 0);
-
-  map.setPaintProperty(countryViewToDisplay, "fill-opacity-transition", {
-    duration: 2000,
-    delay: 0,
-  });
-  map.setPaintProperty(countryViewToDisplay, "fill-opacity", 0.8);
->>>>>>> 4ced6fe (Add drug data adapter for API normalization)
 }
 
 // --- Dark Mode ---
@@ -177,15 +137,6 @@ function buildLegend() {
   });
 }
 
-function buildCountryColorMap(countryStatusMap) {
-  return Object.fromEntries(
-    Object.entries(countryStatusMap).map(([code, entry]) => [
-      code,
-      statusColors[entry?.access_status] || statusColors.Unknown,
-    ])
-  );
-}
-
 // --- Search tile helpers ---
 function setSearchExpanded(expanded, searchTile, searchForm, iconWrap, searchInput) {
   searchTile.classList.toggle("expanded", expanded);
@@ -229,25 +180,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     try {
-      const {
-        success,
-        message,
-        labelText,
-        standardizedKey,
-        countryStatusMap,
-      } = await fetchDrugStatus(query);
+      const RENDER_BACKEND_URL = isLocalhost
+        ? "http://localhost:3000"
+        : "https://render-backend-g0u7.onrender.com";
+      const response = await fetch(`${RENDER_BACKEND_URL}/api/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: query }),
+      });
 
-      if (!success) {
-        searchInput.value = message || `No known record of '${query}'`;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      if (data && data.success === false) {
+        searchInput.value = data.message || `No known record of '${query}'`;
         searchInput.focus();
         return;
       }
 
-      tileData[standardizedKey] = countryStatusMap;
-      const countryColorMap = buildCountryColorMap(countryStatusMap);
+      const standardizedKey = data.normalizedSubstance;
+      const labelText = data.resolved_name || standardizedKey;
 
-      if (Object.keys(countryStatusMap).length > 0) {
-        updateMapColors(countryColorMap);
+      // Transform server data array into map-friendly object
+      tileData[standardizedKey] = Object.fromEntries(
+        (data.data || []).map(({ country_code, access_status, reference_link }) => [
+          country_code,
+          { access_status, reference_link }
+        ])
+      );
+
+      if (tileData[standardizedKey] && Object.keys(tileData[standardizedKey]).length > 0) {
+        updateMapColors(standardizedKey);
 
         setSearchLabel(labelText, iconWrap);
 
