@@ -1,3 +1,5 @@
+import { createSearchTile, SearchTileController } from "./search-tile.js";
+
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";
 
@@ -175,47 +177,19 @@ function buildLegend() {
   });
 }
 
-// --- Search tile helpers ---
-function setSearchExpanded(expanded, searchTile, searchForm, iconWrap, searchInput) {
-  searchTile.classList.toggle("expanded", expanded);
-  iconWrap.classList.toggle("hidden", expanded);
-  searchForm.classList.toggle("hidden", !expanded);
-  if (expanded) setTimeout(() => searchInput.focus(), 50);
-}
-
-function setSearchLabel(labelText, iconWrap) {
-  iconWrap.innerHTML = "";
-  const label = document.createElement("span");
-  label.className = "substance-label";
-  label.textContent = labelText;
-  iconWrap.appendChild(label);
-}
-
 // --- Search tile handlers ---
 document.addEventListener("DOMContentLoaded", () => {
   buildLegend();
 
-  const searchTile = document.querySelector(".search-tile");
-  const iconWrap = searchTile.querySelector(".search-icon-wrap");
-  const searchForm = document.getElementById("searchForm");
-  const searchInput = document.getElementById("searchInput");
+  const tilesContainer = document.getElementById("tilesContainer");
+  const searchTileElements = createSearchTile();
+  tilesContainer.appendChild(searchTileElements.root);
 
-  iconWrap.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    setSearchExpanded(true, searchTile, searchForm, iconWrap, searchInput);
-  });
-
-  searchForm.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const query = searchInput.value.trim();
-    if (!query) return;
-
-    const button = document.getElementById("searchButton");
-    const spinner = button.querySelector(".spinner");
-
-    const spinnerTimeout = setTimeout(() => {
-      spinner.classList.remove("hidden");
-    }, 1000);
+  const controller = new SearchTileController({
+    ...searchTileElements,
+    onSubmit: async (query) => {
+      const { input } = searchTileElements;
+      const searchInput = input;
 
     try {
       const RENDER_BACKEND_URL = isLocalhost
@@ -250,26 +224,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (tileData[standardizedKey] && Object.keys(tileData[standardizedKey]).length > 0) {
         updateMapColors(standardizedKey);
 
-        setSearchLabel(labelText, iconWrap);
+        controller.setLabel(labelText);
 
-        searchTile.classList.add("active");
-        setTimeout(() => searchTile.classList.remove("active"), 1200);
+        controller.pulseActive();
       } else {
         alert(`"${standardizedKey}" was processed, but no map data is available yet.`);
       }
     } catch (err) {
       console.error("Search failed:", err);
       alert(`Failed to fetch data for "${query}". Please try again later.`);
-    } finally {
-      clearTimeout(spinnerTimeout);
-      spinner.classList.add("hidden");
-      setSearchExpanded(false, searchTile, searchForm, iconWrap, searchInput);
     }
-  });
-
-  document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && !searchForm.classList.contains("hidden")) {
-      setSearchExpanded(false, searchTile, searchForm, iconWrap, searchInput);
-    }
+    },
   });
 });
