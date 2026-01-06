@@ -93,7 +93,11 @@ let displayedCountriesViewIsFirst = true;
 function updateMapColors(countryColorMap) {
   if (!map.getLayer("countries-second-view") || !countryColorMap) return;
 
-  const entries = Object.entries(countryColorMap).flatMap(([code, color]) => [
+  const colorMap = Array.isArray(countryColorMap)
+    ? Object.fromEntries(countryColorMap)
+    : countryColorMap;
+
+  const entries = Object.entries(colorMap).flatMap(([code, color]) => [
     code,
     color,
   ]);
