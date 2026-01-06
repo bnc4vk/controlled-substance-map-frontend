@@ -1,3 +1,5 @@
+import { createMap } from "./map-core/map-core.js";
+
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";
 
@@ -9,16 +11,6 @@ const isMobile = window.innerWidth <= 500;
 const mapCenter = isMobile ? [-40, 20] : [10, 20];
 const zoomLevel = isMobile ? 0.8 : 1.3;
 
-const map = new mapboxgl.Map({
-  container: "map",
-  style: "mapbox://styles/mapbox/light-v11",
-  center: mapCenter,
-  zoom: zoomLevel,
-  projection: "mercator",
-});
-
-map.addControl(new mapboxgl.NavigationControl());
-
 // --- Configurations ---
 const statusColors = {
   Unknown: "#666666",
@@ -29,99 +21,69 @@ const statusColors = {
 
 let tileData = {}; // Will now be populated from server response directly
 
-// --- Dark Mode ---
-const hour = new Date().getHours();
-if (hour >= 19 || hour < 7) document.body.classList.add("dark-mode");
+const mapStyle = "mapbox://styles/mapbox/light-v11";
 
-// --- Map layer + coloring ---
-map.on("style.load", () => {
-  map.getStyle().layers.forEach((layer) => {
-    if (layer.type === "symbol" && layer.layout?.["text-field"]) {
-      try {
-        map.setLayoutProperty(layer.id, "visibility", "none");
-      } catch {}
-    }
-  });
-});
-
-map.on("load", () => {
-  map.addSource("countries", {
-    type: "vector",
-    url: "mapbox://mapbox.country-boundaries-v1",
-  });
-
-  // Base greyscale layer (always visible underlay)
-  map.addLayer({
-    id: "countries-first-view",
-    type: "fill",
-    source: "countries",
-    "source-layer": "country_boundaries",
-    paint: {
-      "fill-color": statusColors.Unknown,
-      "fill-opacity": 0.8
+const { map, updateFillColors } = createMap({
+  containerId: "map",
+  mapStyle,
+  center: mapCenter,
+  zoom: zoomLevel,
+  vectorSourceConfig: {
+    id: "countries",
+    source: {
+      type: "vector",
+      url: "mapbox://mapbox.country-boundaries-v1",
     },
-  });
-
-  // Overlay colored layer (starts transparent, sits above base)
-  map.addLayer({
-    id: "countries-second-view",
-    type: "fill",
-    source: "countries",
-    "source-layer": "country_boundaries",
-    paint: {
-      "fill-color": statusColors.Unknown,
-      "fill-opacity": 0
+  },
+  layerConfig: {
+    baseLayer: {
+      id: "countries-first-view",
+      type: "fill",
+      "source-layer": "country_boundaries",
+      paint: {
+        "fill-color": statusColors.Unknown,
+        "fill-opacity": 0.8,
+      },
     },
-  }, "countries-first-view"); // ensure overlay is above base
-
-  // Country tap (mobile)
-  map.on("click", "countries-second-view", (e) => {
+    overlayLayer: {
+      id: "countries-second-view",
+      type: "fill",
+      "source-layer": "country_boundaries",
+      paint: {
+        "fill-color": statusColors.Unknown,
+        "fill-opacity": 0,
+      },
+    },
+  },
+  onFeatureClick: ({ event }) => {
     const activeDrug = Object.keys(tileData)[0];
     if (!activeDrug) return;
 
-    showCountryPopup(e, activeDrug);
-
-    // Auto-close after 3 seconds for mobile
+    showCountryPopup(event, activeDrug);
     setTimeout(() => popup.remove(), 3000);
-  });
-
+  },
 });
 
-let displayedCountriesViewIsFirst = true;
 function updateMapColors(drugKey) {
   const drugData = tileData[drugKey];
   if (!map.getLayer("countries-second-view") || !drugData) return;
 
-  const entries = Object.entries(drugData).flatMap(([code, obj]) => {
-    const status = obj?.access_status || "Unknown";
-    return [code, statusColors[status] || statusColors.Unknown];
+  const colorMap = Object.fromEntries(
+    Object.entries(drugData).map(([code, obj]) => {
+      const status = obj?.access_status || "Unknown";
+      return [code, statusColors[status] || statusColors.Unknown];
+    })
+  );
+
+  updateFillColors({
+    colorMap,
+    defaultColor: statusColors.Unknown,
   });
-
-  const newExpression = [
-    "match",
-    ["slice", ["get", "iso_3166_1"], 0, 2],
-    ...entries,
-    statusColors.Unknown,
-  ];
-
-  const countryViewToHide = displayedCountriesViewIsFirst ? "countries-first-view" : "countries-second-view";
-  const countryViewToDisplay = displayedCountriesViewIsFirst ? "countries-second-view" : "countries-first-view";
-  displayedCountriesViewIsFirst = !displayedCountriesViewIsFirst;
-
-  map.setPaintProperty(countryViewToDisplay, "fill-color", newExpression);
-
-  map.setPaintProperty(countryViewToHide, "fill-opacity-transition", {
-    duration: 2000,
-    delay: 0,
-  });
-  map.setPaintProperty(countryViewToHide, "fill-opacity", 0);
-
-  map.setPaintProperty(countryViewToDisplay, "fill-opacity-transition", {
-    duration: 2000,
-    delay: 0,
-  });
-  map.setPaintProperty(countryViewToDisplay, "fill-opacity", 0.8);
 }
+
+// --- Dark Mode ---
+const hour = new Date().getHours();
+if (hour >= 19 || hour < 7) document.body.classList.add("dark-mode");
 
 // --- Country Hover / Click Popups ---
 const popup = new mapboxgl.Popup({
