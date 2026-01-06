@@ -1,4 +1,5 @@
 import { createMap } from "./map-core/map-core.js";
+import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
 
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";
@@ -19,7 +20,7 @@ const statusColors = {
   "Approved Medical Use": "#27ae60",
 };
 
-let tileData = {}; // Will now be populated from server response directly
+let tileData = {}; // populated from server response
 
 const mapStyle = "mapbox://styles/mapbox/light-v11";
 
@@ -94,14 +95,14 @@ const popup = new mapboxgl.Popup({
 
 function showCountryPopup(event, drugKey) {
   const iso = event.features?.[0]?.properties?.iso_3166_1?.slice(0, 2);
-  if (!iso || !tileData[drugKey] ) return;
+  if (!iso || !tileData[drugKey]) return;
 
   const entry = tileData[drugKey][iso];
   if (!entry) return;
 
   const { access_status, reference_link } = entry;
 
-  if (access_status == 'Unknown') return;
+  if (access_status == "Unknown") return;
 
   const html = `
     <div class="country-popup">
@@ -180,36 +181,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     try {
-      const RENDER_BACKEND_URL = isLocalhost
-        ? "http://localhost:3000"
-        : "https://render-backend-g0u7.onrender.com";
-      const response = await fetch(`${RENDER_BACKEND_URL}/api/predict`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: query }),
-      });
+      const {
+        success,
+        message,
+        labelText,
+        standardizedKey,
+        countryStatusMap,
+      } = await fetchDrugStatus(query);
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-
-      if (data && data.success === false) {
-        searchInput.value = data.message || `No known record of '${query}'`;
+      if (!success) {
+        searchInput.value = message || `No known record of '${query}'`;
         searchInput.focus();
         return;
       }
 
-      const standardizedKey = data.normalizedSubstance;
-      const labelText = data.resolved_name || standardizedKey;
+      tileData[standardizedKey] = countryStatusMap;
 
-      // Transform server data array into map-friendly object
-      tileData[standardizedKey] = Object.fromEntries(
-        (data.data || []).map(({ country_code, access_status, reference_link }) => [
-          country_code,
-          { access_status, reference_link }
-        ])
-      );
-
-      if (tileData[standardizedKey] && Object.keys(tileData[standardizedKey]).length > 0) {
+      if (countryStatusMap && Object.keys(countryStatusMap).length > 0) {
         updateMapColors(standardizedKey);
 
         setSearchLabel(labelText, iconWrap);
