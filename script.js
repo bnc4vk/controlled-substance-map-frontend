@@ -1,3 +1,5 @@
+import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
+
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";
 
@@ -88,14 +90,13 @@ map.on("load", () => {
 });
 
 let displayedCountriesViewIsFirst = true;
-function updateMapColors(drugKey) {
-  const drugData = tileData[drugKey];
-  if (!map.getLayer("countries-second-view") || !drugData) return;
+function updateMapColors(countryColorMap) {
+  if (!map.getLayer("countries-second-view") || !countryColorMap) return;
 
-  const entries = Object.entries(drugData).flatMap(([code, obj]) => {
-    const status = obj?.access_status || "Unknown";
-    return [code, statusColors[status] || statusColors.Unknown];
-  });
+  const entries = Object.entries(countryColorMap).flatMap(([code, color]) => [
+    code,
+    color,
+  ]);
 
   const newExpression = [
     "match",
@@ -175,6 +176,15 @@ function buildLegend() {
   });
 }
 
+function buildCountryColorMap(countryStatusMap) {
+  return Object.fromEntries(
+    Object.entries(countryStatusMap).map(([code, entry]) => [
+      code,
+      statusColors[entry?.access_status] || statusColors.Unknown,
+    ])
+  );
+}
+
 // --- Search tile helpers ---
 function setSearchExpanded(expanded, searchTile, searchForm, iconWrap, searchInput) {
   searchTile.classList.toggle("expanded", expanded);
@@ -218,37 +228,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     try {
-      const RENDER_BACKEND_URL = isLocalhost
-        ? "http://localhost:3000"
-        : "https://render-backend-g0u7.onrender.com";
-      const response = await fetch(`${RENDER_BACKEND_URL}/api/predict`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: query }),
-      });
+      const {
+        success,
+        message,
+        labelText,
+        standardizedKey,
+        countryStatusMap,
+      } = await fetchDrugStatus(query);
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-
-      if (data && data.success === false) {
-        searchInput.value = data.message || `No known record of '${query}'`;
+      if (!success) {
+        searchInput.value = message || `No known record of '${query}'`;
         searchInput.focus();
         return;
       }
 
-      const standardizedKey = data.normalizedSubstance;
-      const labelText = data.resolved_name || standardizedKey;
+      tileData[standardizedKey] = countryStatusMap;
+      const countryColorMap = buildCountryColorMap(countryStatusMap);
 
-      // Transform server data array into map-friendly object
-      tileData[standardizedKey] = Object.fromEntries(
-        (data.data || []).map(({ country_code, access_status, reference_link }) => [
-          country_code,
-          { access_status, reference_link }
-        ])
-      );
-
-      if (tileData[standardizedKey] && Object.keys(tileData[standardizedKey]).length > 0) {
-        updateMapColors(standardizedKey);
+      if (Object.keys(countryStatusMap).length > 0) {
+        updateMapColors(countryColorMap);
 
         setSearchLabel(labelText, iconWrap);
 
