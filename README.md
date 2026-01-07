@@ -7,17 +7,17 @@ your app stylesheet (e.g., `style.css`) and override the shared defaults.
 
 ## Installing dependencies
 
-This app pulls `map-ui-common` from GitHub instead of the npm registry. Install
-dependencies with:
+This app uses `map-ui-common` as a Git submodule. From the repo root, run:
 
 ```bash
-npm install
+git submodule add https://github.com/bnc4vk/map-ui-common.git vendor/map-ui-common
+git submodule update --init --recursive
 ```
 
-If you need to install the shared package directly, use:
+If the submodule is already configured, you only need:
 
 ```bash
-npm install github:bnc4vk/map-ui-common
+git submodule update --init --recursive
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ Include the shared stylesheet before your app-specific styles so you can overrid
 colors and tokens:
 
 ```html
-<link rel="stylesheet" href="shared-map-ui.css" />
+<link rel="stylesheet" href="vendor/map-ui-common/src/ui/shared-map-ui.css" />
 <link rel="stylesheet" href="style.css" />
 ```
 
