@@ -17,7 +17,7 @@ npm install
 If you prefer to install only the shared package, use:
 
 ```bash
-npm install https://github.com/bencohen/map-ui-common.git
+npm install https://github.com/bencohen/map-ui-common/archive/refs/heads/main.tar.gz
 ```
 
 ```html

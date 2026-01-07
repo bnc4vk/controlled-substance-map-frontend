@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "map-ui-common": "https://github.com/bencohen/map-ui-common.git"
+    "map-ui-common": "https://github.com/bencohen/map-ui-common/archive/refs/heads/main.tar.gz"
   }
 }
