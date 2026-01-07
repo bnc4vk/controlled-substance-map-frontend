@@ -1,0 +1,8 @@
+{
+  "name": "drug-map-frontend",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "map-ui-common": "github:bnc4vk/map-ui-common"
+  }
+}
