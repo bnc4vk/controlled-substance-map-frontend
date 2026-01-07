@@ -10,6 +10,10 @@ tokens, header text, and drug labels) should live in your app stylesheet
 Install the shared package and include the stylesheet before your app-specific
 styles so you can override colors and tokens:
 
+```bash
+npm install git+https://github.com/bencohen/map-ui-common.git
+```
+
 ```html
 <link rel="stylesheet" href="node_modules/map-ui-common/ui/shared-map-ui.css" />
 <link rel="stylesheet" href="style.css" />
