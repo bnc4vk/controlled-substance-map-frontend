@@ -1,6 +1,5 @@
-import { createMap } from "./map-core/map-core.js";
+import { createMap, createSearchTile, SearchTileController } from "map-ui-common";
 import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
-import { createSearchTile, SearchTileController } from "./search-tile.js";
 
 // --- Mapbox Setup ---
 const isLocalhost = window.location.hostname === "localhost";

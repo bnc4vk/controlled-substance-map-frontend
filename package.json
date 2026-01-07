@@ -1,0 +1,8 @@
+{
+  "name": "drug-map-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "map-ui-common": "^1.0.0"
+  }
+}
