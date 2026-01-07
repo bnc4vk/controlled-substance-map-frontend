@@ -5,6 +5,21 @@ and interaction patterns for the map container, legend, and search tile. App-
 specific branding (colors, tokens, header text, and drug labels) should live in
 your app stylesheet (e.g., `style.css`) and override the shared defaults.
 
+## Installing dependencies
+
+This app pulls `map-ui-common` from GitHub instead of the npm registry. Install
+dependencies with:
+
+```bash
+npm install
+```
+
+If you need to install the shared package directly, use:
+
+```bash
+npm install github:bnc4vk/map-ui-common
+```
+
 ## Usage
 
 Include the shared stylesheet before your app-specific styles so you can override
