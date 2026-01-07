@@ -7,11 +7,17 @@ tokens, header text, and drug labels) should live in your app stylesheet
 
 ## Usage
 
-Install the shared package and include the stylesheet before your app-specific
-styles so you can override colors and tokens:
+Install dependencies and include the stylesheet before your app-specific styles
+so you can override colors and tokens:
 
 ```bash
-npm install git+https://github.com/bencohen/map-ui-common.git
+npm install
+```
+
+If you prefer to install only the shared package, use:
+
+```bash
+npm install https://github.com/bencohen/map-ui-common.git
 ```
 
 ```html
