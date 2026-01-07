@@ -1,18 +1,91 @@
-# Shared Map UI Styles
+# Map UI Common
 
-This repo includes a reusable stylesheet (`map-ui-common/src/ui/shared-map-ui.css`)
-that defines layout and interaction patterns for the map container, legend, and
-search tile. App-specific branding (colors, tokens, header text, and drug labels)
-should live in your app stylesheet (e.g., `style.css`) and override the shared
-defaults.
+Shared UI building blocks for the map experience, including the map core helper,
+search tile UI controller, and shared CSS for layout/interaction patterns.
+
+## Installation
+
+```bash
+npm install map-ui-common
+```
 
 ## Usage
+
+### Map core helper
+
+```js
+import { createMap } from "map-ui-common/map-core";
+
+const { map, updateFillColors } = createMap({
+  containerId: "map",
+  mapStyle: "mapbox://styles/mapbox/light-v10",
+  center: [-98.5795, 39.8283],
+  zoom: 3,
+  vectorSourceConfig: {
+    id: "countries",
+    source: {
+      type: "vector",
+      url: "mapbox://your.tileset",
+    },
+  },
+  layerConfig: {
+    baseLayer: {
+      id: "countries-base",
+      type: "fill",
+      "source-layer": "countries",
+      paint: { "fill-color": "#dfe6e9" },
+    },
+    overlayLayer: {
+      id: "countries-overlay",
+      type: "fill",
+      "source-layer": "countries",
+      paint: { "fill-color": "#74b9ff" },
+    },
+  },
+});
+
+updateFillColors({
+  colorMap: {
+    US: "#6c5ce7",
+    CA: "#00b894",
+  },
+});
+```
+
+### Search tile controller
+
+```js
+import {
+  createSearchTile,
+  SearchTileController,
+} from "map-ui-common/ui/search-tile";
+
+const { root, iconWrap, form, input, button, spinner } = createSearchTile({
+  placeholder: "Search for substance",
+});
+
+const controller = new SearchTileController({
+  root,
+  iconWrap,
+  form,
+  input,
+  button,
+  spinner,
+  onSubmit: async (query) => {
+    console.log("Search:", query);
+  },
+});
+
+document.body.appendChild(root);
+```
+
+### Shared stylesheet
 
 Include the shared stylesheet before your app-specific styles so you can override
 colors and tokens:
 
 ```html
-<link rel="stylesheet" href="map-ui-common/src/ui/shared-map-ui.css" />
+<link rel="stylesheet" href="node_modules/map-ui-common/ui/shared-map-ui.css" />
 <link rel="stylesheet" href="style.css" />
 ```
 
