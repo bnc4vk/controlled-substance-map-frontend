@@ -1,17 +1,17 @@
 # Shared Map UI Styles
 
-This repo includes a reusable stylesheet (`shared-map-ui.css`) that defines layout
-and interaction patterns for the map container, legend, and search tile. App-
-specific branding (colors, tokens, header text, and drug labels) should live in
-your app stylesheet (e.g., `style.css`) and override the shared defaults.
+This repo consumes `map-ui-common` for shared layout and interaction patterns
+for the map container, legend, and search tile. App-specific branding (colors,
+tokens, header text, and drug labels) should live in your app stylesheet
+(e.g., `style.css`) and override the shared defaults.
 
 ## Usage
 
-Include the shared stylesheet before your app-specific styles so you can override
-colors and tokens:
+Install the shared package and include the stylesheet before your app-specific
+styles so you can override colors and tokens:
 
 ```html
-<link rel="stylesheet" href="shared-map-ui.css" />
+<link rel="stylesheet" href="node_modules/map-ui-common/ui/shared-map-ui.css" />
 <link rel="stylesheet" href="style.css" />
 ```
 
