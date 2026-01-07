@@ -153,36 +153,36 @@ document.addEventListener("DOMContentLoaded", () => {
       const { input } = searchTileElements;
       const searchInput = input;
 
-    try {
-      const {
-        success,
-        message,
-        labelText,
-        standardizedKey,
-        countryStatusMap,
-      } = await fetchDrugStatus(query);
+      try {
+        const {
+          success,
+          message,
+          labelText,
+          standardizedKey,
+          countryStatusMap,
+        } = await fetchDrugStatus(query);
 
-      if (!success) {
-        searchInput.value = message || `No known record of '${query}'`;
-        searchInput.focus();
-        return;
+        if (!success) {
+          searchInput.value = message || `No known record of '${query}'`;
+          searchInput.focus();
+          return;
+        }
+
+        tileData[standardizedKey] = countryStatusMap;
+
+        if (countryStatusMap && Object.keys(countryStatusMap).length > 0) {
+          updateMapColors(standardizedKey);
+
+          controller.setLabel(labelText);
+
+          controller.pulseActive();
+        } else {
+          alert(`"${standardizedKey}" was processed, but no map data is available yet.`);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
+        alert(`Failed to fetch data for "${query}". Please try again later.`);
       }
-
-      tileData[standardizedKey] = countryStatusMap;
-
-      if (countryStatusMap && Object.keys(countryStatusMap).length > 0) {
-        updateMapColors(standardizedKey);
-
-        controller.setLabel(labelText);
-
-        controller.pulseActive();
-      } else {
-        alert(`"${standardizedKey}" was processed, but no map data is available yet.`);
-      }
-    } catch (err) {
-      console.error("Search failed:", err);
-      alert(`Failed to fetch data for "${query}". Please try again later.`);
-    }
     },
   });
 });

@@ -1,71 +1,23 @@
-# Shared Map UI Styles
+# Drug Map Frontend
 
-This repo includes a reusable stylesheet (`shared-map-ui.css`) that defines layout
-and interaction patterns for the map container, legend, and search tile. App-
-specific branding (colors, tokens, header text, and drug labels) should live in
-your app stylesheet (e.g., `style.css`) and override the shared defaults.
+This frontend pulls shared layout and interaction styles from `map-ui-common` and layers
+app-specific branding in `style.css`.
 
 ## Usage
 
-Include the shared stylesheet before your app-specific styles so you can override
-colors and tokens:
+Include the shared stylesheet before app overrides:
 
 ```html
-<link rel="stylesheet" href="shared-map-ui.css" />
+<link rel="stylesheet" href="node_modules/map-ui-common/src/ui/shared-map-ui.css" />
 <link rel="stylesheet" href="style.css" />
 ```
 
-## HTML/CSS Contract
+The search tile UI and map helpers also come from `map-ui-common` via import maps in
+`index.html`.
 
-### Map container
+## App-specific overrides
 
-```html
-<div class="map-wrapper">
-  <div class="map-aspect">
-    <div id="map"></div>
-  </div>
-</div>
-```
-
-### Legend
-
-```html
-<div class="legend">
-  <div class="legend-item">
-    <span class="legend-color" style="background-color: #6c5ce7;"></span>
-    <span>Legend label</span>
-  </div>
-</div>
-```
-
-### Search tile
-
-```html
-<div class="tile search-tile" aria-label="Search substance">
-  <div class="search-icon-wrap" role="button" title="Search">
-    <svg class="search-icon" viewBox="0 0 24 24" fill="none">
-      <!-- icon paths -->
-    </svg>
-  </div>
-
-  <form class="search-form hidden">
-    <input class="search-input" type="text" placeholder="Search..." />
-    <button class="search-submit" type="submit">
-      <span class="spinner hidden"></span>
-    </button>
-  </form>
-</div>
-```
-
-#### State classes
-
-- `.hidden` hides elements for collapsed states.
-- `.expanded` on `.search-tile` reveals the input field.
-
-## Brand/Color Overrides
-
-The shared stylesheet uses CSS variables so each app can define its own colors
-and tokens. Define these variables in your app stylesheet (example values shown):
+Define custom colors and tokens in `style.css` using the shared CSS variables:
 
 ```css
 :root {
