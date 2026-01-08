@@ -38,6 +38,7 @@ const { map, updateFillColors } = createMap({
     },
   },
   layerConfig: {
+    featureProperty: "iso_3166_1",
     baseLayer: {
       id: "countries-first-view",
       type: "fill",
@@ -56,6 +57,17 @@ const { map, updateFillColors } = createMap({
         "fill-opacity": 0,
       },
     },
+    levels: [
+      {
+        id: "countries",
+        featureProperty: "iso_3166_1",
+        layerIds: {
+          base: "countries-first-view",
+          overlay: "countries-second-view",
+          interaction: "countries-second-view",
+        },
+      },
+    ],
   },
   onFeatureClick: ({ event }) => {
     const activeDrug = Object.keys(tileData)[0];
