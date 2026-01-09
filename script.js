@@ -1,17 +1,11 @@
 import { createMap } from "map-ui-common/map-core";
+import { getMapConfig } from "map-ui-common/map-core/config";
 import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
 
 // --- Mapbox Setup ---
-const isLocalhost = window.location.hostname === "localhost";
-
-mapboxgl.accessToken = isLocalhost
-  ? "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmtuNzExZTBma2YyaXB5N2V3cnNqZHYifQ.81pi_QteF8dXpaLdAgAcbA"
-  : "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmttd2l0NDBlcmgybXB6engyZ3NsOXMifQ.ispasH40DZiTItGPC7EuQQ";
-
-const isMobile = window.innerWidth <= 500;
-const mapCenter = isMobile ? [-40, 20] : [10, 20];
-const zoomLevel = isMobile ? 0.8 : 1.3;
+const { accessToken, mapCenter, zoomLevel } = getMapConfig();
+mapboxgl.accessToken = accessToken;
 
 // --- Configurations ---
 const statusColors = {
