@@ -2,6 +2,7 @@ import { createMap } from "map-ui-common/map-core";
 import { getMapConfig } from "map-ui-common/map-core/config";
 import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
+import { createMapLegend } from "map-ui-common/ui/map-legend";
 
 // --- Mapbox Setup ---
 const { accessToken, mapCenter, zoomLevel } = getMapConfig();
@@ -114,28 +115,12 @@ function showCountryPopup(event, drugKey) {
   popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
 }
 
-// --- Legend ---
-function buildLegend() {
-  const legendContainer = document.getElementById("legend");
-  legendContainer.innerHTML = "";
-  Object.entries(statusColors).forEach(([status, color]) => {
-    const item = document.createElement("div");
-    item.className = "legend-item";
-    const colorBox = document.createElement("span");
-    colorBox.className = "legend-color";
-    colorBox.style.backgroundColor = color;
-    const label = document.createElement("span");
-    label.className = "legend-label";
-    label.textContent = status;
-    item.appendChild(colorBox);
-    item.appendChild(label);
-    legendContainer.appendChild(item);
-  });
-}
-
 // --- Search tile handlers ---
 document.addEventListener("DOMContentLoaded", () => {
-  buildLegend();
+  const legendContainer = document.getElementById("legend");
+  const { root: legend } = createMapLegend({ statusColors });
+  legend.id = "legend";
+  legendContainer.replaceWith(legend);
 
   const tilesContainer = document.getElementById("tilesContainer");
   const searchTileElements = createSearchTile();
