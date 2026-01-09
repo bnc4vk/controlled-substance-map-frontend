@@ -1,17 +1,24 @@
 import { createMap } from "map-ui-common/map-core";
-import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
+import { loadMapboxAssets } from "map-ui-common/map-core/mapbox-assets";
+import {
+  configureMapboxAccessToken,
+  getMapboxViewportConfig,
+} from "map-ui-common/map-core/mapbox-setup";
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
+import { buildLegend as buildLegendUI } from "map-ui-common/ui/legend";
+import { createCountryPopup } from "map-ui-common/ui/country-popup";
+import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
 
-// --- Mapbox Setup ---
-const isLocalhost = window.location.hostname === "localhost";
+await loadMapboxAssets();
 
-mapboxgl.accessToken = isLocalhost
-  ? "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmtuNzExZTBma2YyaXB5N2V3cnNqZHYifQ.81pi_QteF8dXpaLdAgAcbA"
-  : "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmttd2l0NDBlcmgybXB6engyZ3NsOXMifQ.ispasH40DZiTItGPC7EuQQ";
+configureMapboxAccessToken({
+  localToken:
+    "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmtuNzExZTBma2YyaXB5N2V3cnNqZHYifQ.81pi_QteF8dXpaLdAgAcbA",
+  prodToken:
+    "pk.eyJ1IjoiYm5jNHZrIiwiYSI6ImNtZmttd2l0NDBlcmgybXB6engyZ3NsOXMifQ.ispasH40DZiTItGPC7EuQQ",
+});
 
-const isMobile = window.innerWidth <= 500;
-const mapCenter = isMobile ? [-40, 20] : [10, 20];
-const zoomLevel = isMobile ? 0.8 : 1.3;
+const { center: mapCenter, zoom: zoomLevel } = getMapboxViewportConfig();
 
 // --- Configurations ---
 const statusColors = {
@@ -22,6 +29,7 @@ const statusColors = {
 };
 
 let tileData = {}; // populated from server response
+let activeDrugKey = null;
 
 const mapStyle = "mapbox://styles/mapbox/light-v11";
 
@@ -58,17 +66,36 @@ const { map, updateFillColors } = createMap({
     },
   },
   onFeatureClick: ({ event }) => {
-    const activeDrug = Object.keys(tileData)[0];
-    if (!activeDrug) return;
-
-    showCountryPopup(event, activeDrug);
+    if (!activeDrugKey) return;
+    showCountryPopup(event);
     setTimeout(() => popup.remove(), 3000);
+  },
+});
+
+const { popup, showPopup: showCountryPopup } = createCountryPopup({
+  map,
+  getEntry: (iso) => tileData[activeDrugKey]?.[iso],
+  hideWhen: (entry) => entry?.access_status === "Unknown",
+  renderHtml: ({ iso, entry }) => {
+    const { access_status, reference_link } = entry;
+    return `
+      <div class="country-popup">
+        <strong>${iso}</strong><br>
+        Status: ${access_status}<br>
+        ${
+          reference_link
+            ? `<a href="${reference_link}" target="_blank" class="popup-link">Reference</a>`
+            : `<span class="popup-no-link">No reference</span>`
+        }
+      </div>
+    `;
   },
 });
 
 function updateMapColors(drugKey) {
   const drugData = tileData[drugKey];
   if (!map.getLayer("countries-second-view") || !drugData) return;
+  activeDrugKey = drugKey;
 
   const colorMap = Object.fromEntries(
     Object.entries(drugData).map(([code, obj]) => {
@@ -87,56 +114,14 @@ function updateMapColors(drugKey) {
 const hour = new Date().getHours();
 if (hour >= 19 || hour < 7) document.body.classList.add("dark-mode");
 
-// --- Country Hover / Click Popups ---
-const popup = new mapboxgl.Popup({
-  closeButton: false,
-  closeOnClick: false,
-  maxWidth: "240px",
-});
-
-function showCountryPopup(event, drugKey) {
-  const iso = event.features?.[0]?.properties?.iso_3166_1?.slice(0, 2);
-  if (!iso || !tileData[drugKey]) return;
-
-  const entry = tileData[drugKey][iso];
-  if (!entry) return;
-
-  const { access_status, reference_link } = entry;
-
-  if (access_status == "Unknown") return;
-
-  const html = `
-    <div class="country-popup">
-      <strong>${iso}</strong><br>
-      Status: ${access_status}<br>
-      ${
-        reference_link
-          ? `<a href="${reference_link}" target="_blank" class="popup-link">Reference</a>`
-          : `<span class="popup-no-link">No reference</span>`
-      }
-    </div>
-  `;
-
-  popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
-}
-
 // --- Legend ---
 function buildLegend() {
-  const legendContainer = document.getElementById("legend");
-  legendContainer.innerHTML = "";
-  Object.entries(statusColors).forEach(([status, color]) => {
-    const item = document.createElement("div");
-    item.className = "legend-item";
-    const colorBox = document.createElement("span");
-    colorBox.className = "legend-color";
-    colorBox.style.backgroundColor = color;
-    const label = document.createElement("span");
-    label.className = "legend-label";
-    label.textContent = status;
-    item.appendChild(colorBox);
-    item.appendChild(label);
-    legendContainer.appendChild(item);
-  });
+  const items = Object.entries(statusColors).map(([label, color]) => ({
+    label,
+    color,
+  }));
+
+  buildLegendUI({ containerId: "legend", items });
 }
 
 // --- Search tile handlers ---

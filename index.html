@@ -6,17 +6,18 @@
     <title>Drug Accessibility Map</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Mapbox -->
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-
     <link rel="stylesheet" href="node_modules/map-ui-common/src/ui/shared-map-ui.css" />
+    <link rel="stylesheet" href="src/map-ui-common/ui/shared-map-theme.css" />
     <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
         "imports": {
           "map-ui-common/map-core": "./node_modules/map-ui-common/src/map-core/map-core.js",
-          "map-ui-common/ui/search-tile": "./node_modules/map-ui-common/src/ui/search-tile.js"
+          "map-ui-common/map-core/mapbox-assets": "./src/map-ui-common/map-core/mapbox-assets.js",
+          "map-ui-common/map-core/mapbox-setup": "./src/map-ui-common/map-core/mapbox-setup.js",
+          "map-ui-common/ui/search-tile": "./node_modules/map-ui-common/src/ui/search-tile.js",
+          "map-ui-common/ui/legend": "./src/map-ui-common/ui/legend.js",
+          "map-ui-common/ui/country-popup": "./src/map-ui-common/ui/country-popup.js"
         }
       }
     </script>
