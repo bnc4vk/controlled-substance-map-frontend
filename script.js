@@ -1,6 +1,6 @@
 import { createMap } from "map-ui-common/map-core";
 import { getMapConfig } from "map-ui-common/map-core/config";
-import { fetchControlledSubstanceStatus } from "./src/adapters/controlled-substance-data-provider.js";
+import { fetchControlledSubstanceStatus } from "./src/data-providers/controlled-substance-data-provider.js";
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
 import { createMapLegend } from "map-ui-common/ui/map-legend";
 
