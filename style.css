@@ -1,64 +1,55 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-/* -------------------------
-   HEADER
-   ------------------------- */
 .page-header {
   text-align: center;
   padding: 20px 10px;
-  background-color: #ffffff;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
-.page-header h1 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
+
 .header-divider {
   border: none;
   border-top: 2px solid #ddd;
-  margin: 0 20px 2px 20px;
+  margin: 0 20px 16px;
 }
 
-/* -------------------------
-   TILES
-   ------------------------- */
 .tiles-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  padding: 15px;
-  width: 100%;
+  margin-bottom: 16px;
 }
-.tile {
-  flex: 1 1 150px;
-  max-width: 200px;
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background-color: #4A90E2;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+
+/* Search tile overrides aligned with map-ui-common */
+.tile.search-tile {
+  background-color: #ffffff;
+  color: #222;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: text;
+}
+
+.tile.search-tile:hover {
+  background-color: #f5f7fb;
+}
+
+.tile.search-tile:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.search-icon-wrap {
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
-.tile:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-  background-color: #3C7CC0;
+
+.search-input {
+  color: #111;
+  caret-color: #111;
 }
+
+.search-input::placeholder {
+  color: #6b7280;
+}
+
 .search-icon-wrap .substance-label {
   color: #222;
   font-size: 14px;
@@ -68,45 +59,33 @@ body.dark-mode .search-icon-wrap .substance-label {
   color: #eee;
 }
 
-/* -------------------------
-   DARK MODE
-   ------------------------- */
-body.dark-mode .page-header { background-color: #121212; }
-body.dark-mode .page-header h1 { color: #eee; }
-body.dark-mode .header-divider { border-top: 2px solid #444; }
-body.dark-mode .tiles-container { background-color: #121212; }
-body.dark-mode .tile { background-color: #2d2d2d; color: #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-body.dark-mode .tile:hover { background-color: #1e1e1e; }
-body.dark-mode .search-cancel { color: #aaa; }
-body.dark-mode .search-cancel:hover { color: #ddd; }
-body.dark-mode .substance-label { color: #eee; }
-
-/* -------------------------
-   RESPONSIVE
-   ------------------------- */
-@media (max-width: 900px) {
-  .tile {
-    flex: 1 1 calc(33.33% - 8px);
-    max-width: calc(33.33% - 8px);
-    font-size: 0.9rem;
-    padding: 10px 12px;
-  }
+body.dark-mode .tile.search-tile {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
 }
-
-@media (max-width: 500px) {
-  .tile {
-    flex: 1 1 calc(50% - 6px);
-    max-width: calc(70%);
-    font-size: 0.8rem;
-    padding: 8px 10px;
-    height: 30px;
-  }
-  .tile.expanded {
-    width: 70%;
-    max-width: 70%;
-  }
-  .page-header { padding: 12px 8px; }
-  .page-header h1 { font-size: 18px; line-height: 1.2; }
+body.dark-mode .tile.search-tile:hover {
+  background-color: #111827;
+}
+body.dark-mode .tile.search-tile:focus-within {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+}
+body.dark-mode .search-input {
+  color: #f3f4f6;
+  caret-color: #f3f4f6;
+}
+body.dark-mode .search-input::placeholder {
+  color: #9ca3af;
+}
+body.dark-mode .search-cancel {
+  color: #aaa;
+}
+body.dark-mode .search-cancel:hover {
+  color: #ddd;
+}
+body.dark-mode .substance-label {
+  color: #eee;
 }
 
 .country-popup {
@@ -120,7 +99,7 @@ body.dark-mode .country-popup {
 }
 
 .popup-link {
-  color: #4A90E2;
+  color: #4a90e2;
   text-decoration: underline;
   font-weight: 500;
 }

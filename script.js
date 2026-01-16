@@ -4,11 +4,9 @@ import { fetchControlledSubstanceStatus } from "./src/data-providers/controlled-
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
 import { createMapLegend } from "map-ui-common/ui/map-legend";
 
-// --- Mapbox Setup ---
 const { accessToken, mapCenter, zoomLevel } = getMapConfig();
 mapboxgl.accessToken = accessToken;
 
-// --- Configurations ---
 const statusColors = {
   Unknown: "#666666",
   Banned: "#e74c3c",
@@ -16,9 +14,8 @@ const statusColors = {
   "Approved Medical Use": "#27ae60",
 };
 
-let tileData = {}; // populated from server response
-
 const mapStyle = "mapbox://styles/mapbox/light-v11";
+const tileData = {};
 
 const { map, updateFillColors } = createMap({
   containerId: "map",
@@ -61,28 +58,9 @@ const { map, updateFillColors } = createMap({
   },
 });
 
-function updateMapColors(drugKey) {
-  const drugData = tileData[drugKey];
-  if (!map.getLayer("countries-second-view") || !drugData) return;
-
-  const colorMap = Object.fromEntries(
-    Object.entries(drugData).map(([code, obj]) => {
-      const status = obj?.access_status || "Unknown";
-      return [code, statusColors[status] || statusColors.Unknown];
-    })
-  );
-
-  updateFillColors({
-    colorMap,
-    defaultColor: statusColors.Unknown,
-  });
-}
-
-// --- Dark Mode ---
 const hour = new Date().getHours();
 if (hour >= 19 || hour < 7) document.body.classList.add("dark-mode");
 
-// --- Country Hover / Click Popups ---
 const popup = new mapboxgl.Popup({
   closeButton: false,
   closeOnClick: false,
@@ -115,7 +93,6 @@ function showCountryPopup(event, drugKey) {
   popup.setLngLat(event.lngLat).setHTML(html).addTo(map);
 }
 
-// --- Search tile handlers ---
 document.addEventListener("DOMContentLoaded", () => {
   const legendContainer = document.getElementById("legend");
   const { root: legend } = createMapLegend({ statusColors });
@@ -123,15 +100,14 @@ document.addEventListener("DOMContentLoaded", () => {
   legendContainer.replaceWith(legend);
 
   const tilesContainer = document.getElementById("tilesContainer");
-  const searchTileElements = createSearchTile();
+  const searchTileElements = createSearchTile({
+    placeholder: "Search for a substance",
+  });
   tilesContainer.appendChild(searchTileElements.root);
 
   const controller = new SearchTileController({
     ...searchTileElements,
     onSubmit: async (query) => {
-      const { input } = searchTileElements;
-      const searchInput = input;
-
       try {
         const {
           success,
@@ -142,18 +118,26 @@ document.addEventListener("DOMContentLoaded", () => {
         } = await fetchControlledSubstanceStatus(query);
 
         if (!success) {
-          searchInput.value = message || `No known record of '${query}'`;
-          searchInput.focus();
-          return;
+          searchTileElements.input.value = message || `No known record of '${query}'`;
+          searchTileElements.input.focus();
+          return false;
         }
 
         tileData[standardizedSubstanceKey] = countryStatusByCode;
 
         if (countryStatusByCode && Object.keys(countryStatusByCode).length > 0) {
-          updateMapColors(standardizedSubstanceKey);
+          const colorMap = Object.fromEntries(
+            Object.entries(countryStatusByCode).map(([code, obj]) => [
+              code,
+              statusColors[obj?.access_status || "Unknown"] || statusColors.Unknown,
+            ])
+          );
+          updateFillColors({
+            colorMap,
+            defaultColor: statusColors.Unknown,
+          });
 
           controller.setLabel(substanceLabel);
-
           controller.pulseActive();
         } else {
           alert(
@@ -163,7 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         console.error("Search failed:", err);
         alert(`Failed to fetch data for "${query}". Please try again later.`);
+        return false;
       }
+
+      return true;
     },
   });
 });
