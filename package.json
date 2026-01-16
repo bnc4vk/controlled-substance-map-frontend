@@ -1,5 +1,5 @@
 {
-  "name": "drug-map-frontend",
+  "name": "controlled-substance-map-frontend",
   "private": true,
   "type": "module",
   "dependencies": {
