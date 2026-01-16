@@ -1,6 +1,6 @@
 import { createMap } from "map-ui-common/map-core";
 import { getMapConfig } from "map-ui-common/map-core/config";
-import { fetchDrugStatus } from "./src/adapters/drugDataAdapter.js";
+import { fetchControlledSubstanceStatus } from "./src/adapters/controlled-substance-data-provider.js";
 import { createSearchTile, SearchTileController } from "map-ui-common/ui/search-tile";
 import { createMapLegend } from "map-ui-common/ui/map-legend";
 
@@ -136,10 +136,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const {
           success,
           message,
-          labelText,
-          standardizedKey,
-          countryStatusMap,
-        } = await fetchDrugStatus(query);
+          substanceLabel,
+          standardizedSubstanceKey,
+          countryStatusByCode,
+        } = await fetchControlledSubstanceStatus(query);
 
         if (!success) {
           searchInput.value = message || `No known record of '${query}'`;
@@ -147,16 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        tileData[standardizedKey] = countryStatusMap;
+        tileData[standardizedSubstanceKey] = countryStatusByCode;
 
-        if (countryStatusMap && Object.keys(countryStatusMap).length > 0) {
-          updateMapColors(standardizedKey);
+        if (countryStatusByCode && Object.keys(countryStatusByCode).length > 0) {
+          updateMapColors(standardizedSubstanceKey);
 
-          controller.setLabel(labelText);
+          controller.setLabel(substanceLabel);
 
           controller.pulseActive();
         } else {
-          alert(`"${standardizedKey}" was processed, but no map data is available yet.`);
+          alert(
+            `"${standardizedSubstanceKey}" was processed, but no map data is available yet.`
+          );
         }
       } catch (err) {
         console.error("Search failed:", err);
