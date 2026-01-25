@@ -14,7 +14,13 @@ const statusColors = {
   "Approved Medical Use": "#27ae60",
 };
 
-const mapStyle = "mapbox://styles/mapbox/light-v11";
+const hour = new Date().getHours();
+const isDarkMode = hour >= 19 || hour < 7;
+if (isDarkMode) document.body.classList.add("dark-mode");
+
+const mapStyle = isDarkMode
+  ? "mapbox://styles/mapbox/dark-v11"
+  : "mapbox://styles/mapbox/light-v11";
 const tileData = {};
 
 const { map, updateFillColors } = createMap({
@@ -57,9 +63,6 @@ const { map, updateFillColors } = createMap({
     setTimeout(() => popup.remove(), 3000);
   },
 });
-
-const hour = new Date().getHours();
-if (hour >= 19 || hour < 7) document.body.classList.add("dark-mode");
 
 const popup = new mapboxgl.Popup({
   closeButton: false,

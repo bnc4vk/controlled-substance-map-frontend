@@ -1,21 +1,85 @@
+:root {
+  --page-bg: #f8fafc;
+  --page-text: #0f172a;
+  --page-divider: #e2e8f0;
+
+  --map-ui-wrapper-bg: var(--page-bg);
+  --map-ui-map-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+
+  --map-ui-legend-bg: rgba(255, 255, 255, 0.92);
+  --map-ui-legend-text: #0f172a;
+  --map-ui-legend-item-bg: rgba(255, 255, 255, 0.9);
+  --map-ui-legend-shadow: 0 12px 22px rgba(15, 23, 42, 0.12);
+
+  --map-ui-search-bg: #ffffff;
+  --map-ui-search-bg-hover: #f1f5f9;
+  --map-ui-search-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  --map-ui-search-shadow-hover: 0 12px 26px rgba(15, 23, 42, 0.16);
+  --map-ui-search-input: #0f172a;
+  --map-ui-search-placeholder: #64748b;
+  --map-ui-search-submit: #475569;
+  --map-ui-search-submit-hover: #0f172a;
+  --map-ui-search-icon-stroke: #334155;
+  --map-ui-spinner-track: #e2e8f0;
+  --map-ui-spinner-head: #334155;
+}
+
+body.dark-mode {
+  --page-bg: #0b1120;
+  --page-text: #e2e8f0;
+  --page-divider: #1f2937;
+
+  --map-ui-wrapper-bg: var(--page-bg);
+  --map-ui-map-shadow: 0 18px 36px rgba(0, 0, 0, 0.5);
+
+  --map-ui-legend-bg: rgba(15, 23, 42, 0.9);
+  --map-ui-legend-text: #e2e8f0;
+  --map-ui-legend-item-bg: rgba(30, 41, 59, 0.8);
+  --map-ui-legend-shadow: 0 18px 30px rgba(0, 0, 0, 0.55);
+
+  --map-ui-search-bg: #1f2937;
+  --map-ui-search-bg-hover: #111827;
+  --map-ui-search-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  --map-ui-search-shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.6);
+  --map-ui-search-input: #e2e8f0;
+  --map-ui-search-placeholder: #94a3b8;
+  --map-ui-search-submit: #cbd5f5;
+  --map-ui-search-submit-hover: #f8fafc;
+  --map-ui-search-icon-stroke: #cbd5f5;
+  --map-ui-spinner-track: #334155;
+  --map-ui-spinner-head: #e2e8f0;
+}
+
 body {
   font-family: "Inter", sans-serif;
+  background: var(--page-bg);
+  color: var(--page-text);
 }
 
 .page-header {
   text-align: center;
   padding: 20px 10px;
   font-family: "Arial", sans-serif;
+  color: inherit;
 }
 
 .header-divider {
   border: none;
-  border-top: 2px solid #ddd;
+  border-top: 2px solid var(--page-divider);
   margin: 0 20px 16px;
 }
 
 .tiles-container {
   margin-bottom: 16px;
+}
+
+.map-wrapper {
+  background: var(--page-bg);
+}
+
+.legend {
+  width: fit-content;
+  max-width: calc(100% - 40px);
 }
 
 /* Search tile overrides aligned with map-ui-common */
