@@ -8,10 +8,19 @@ app-specific branding in `style.css`.
 From the repo root, run:
 
 ```bash
-python -m http.server 8000
+npm install
+npm run dev
 ```
 
-Then open `http://localhost:8000` in your browser.
+Then open the local URL shown in the terminal.
+
+## Build for GitHub Pages
+
+```bash
+npm run build
+```
+
+The static site is generated in `dist/`.
 
 ## Troubleshooting
 

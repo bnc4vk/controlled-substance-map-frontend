@@ -1,3 +1,6 @@
+import "map-ui-common/ui/shared-map-ui.css";
+import "./style.css";
+
 import { createMap } from "map-ui-common/map-core";
 import { getMapConfig } from "map-ui-common/map-core/config";
 import { fetchControlledSubstanceStatus } from "./src/data-providers/controlled-substance-data-provider.js";

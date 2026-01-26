@@ -2,7 +2,15 @@
   "name": "controlled-substance-map-frontend",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "map-ui-common": "github:bnc4vk/map-ui-common"
+  },
+  "devDependencies": {
+    "vite": "^6.4.1"
   }
 }
